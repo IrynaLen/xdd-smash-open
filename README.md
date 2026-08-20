@@ -1,22 +1,40 @@
 # xdd-smash
 
-A framework for building RTB bidding platforms.
+Own your RTB stack.
 
-xdd-smash is a proxy RTB bidder. It sits between XE and DSPs, runs a pipeline on every bid request, and returns the result to XE.
+Vendors sell white-label: your logo, their black box, their roadmap. You cannot read the code, so you cannot verify what happens to your requests — and when something is wrong, the consequences land on you, not on them. Their complexity is not an accident either. The harder the stack is to understand, the harder you are to replace.
 
-```
-SSP -> XE -> xdd-smash -> DSP
-```
+xdd-smash is the other option. An open framework you run yourself, plus a private copy of the repository, code review, and consulting from the people who wrote it. Cheaper than renting a platform, and nothing waits on someone else's roadmap.
 
-XE is a set of features that let you go live from day one. It is not a dependency. It is the business framework around xdd-smash — features you can gradually build into your own platform or replace with your own implementations together with xdd.
+**One developer is enough to run it.** That is why simplicity matters here: independence you cannot staff is not independence.
+
+Trust in programmatic cannot be audited from the outside — you see what you sent, not what was forwarded. It stops being a problem when every participant runs their own stack. That is why this is open.
 
 ---
 
-## The model
+## What it is
 
-Everything you build in xdd-smash is a feature. A feature is one or more hooks registered into the pipeline.
+A proxy RTB bidder. It sits between your ad management platform and your demand, runs a pipeline on every bid request, and returns the result.
 
-A hook is the key pattern for writing anything in this framework:
+```
+SSP / SDK / etc -> Ad management platform (e.g. XE) -> xdd-smash -> DSP / demand
+```
+
+It ships integrated with XE, an ad management platform, which brings ready-made features that are not part of the core. The core is a general framework: write features as hooks, drop a folder, and it is picked up at startup. There is no central file to edit.
+
+---
+
+## Getting started
+
+Not written yet. Getting from a clone to a bid response should take minutes, and today it does not — see [#6](https://github.com/xe-works/xdd-smash-open/issues/6). Help is welcome there; it is the first thing anyone tries.
+
+Node 22 or newer, and the reference for the request shape is [docs/framework.md](docs/framework.md).
+
+---
+
+## For developers
+
+The building block is a **hook**: a function that receives the request context and either returns it to continue, or returns `null` for a no-bid.
 
 ```js
 export default function(ctx) {
@@ -25,38 +43,21 @@ export default function(ctx) {
 }
 ```
 
-The pipeline runs your hooks at the right stage. You control when a hook fires by where you put the file and what you name it.
+A **feature** is one or more hooks in a folder. Two kinds, and the difference is about failure:
 
-Features come in two kinds:
+- **Stateless** — no external dependencies, so there is little to fail.
+- **Stateful** — depends on Redis, a database, something over the network. Must be fail-open: if the dependency is unreachable, return `ctx` untouched. A bid is never lost to infrastructure.
 
-**Stateless.** Enriches or filters requests with no external dependencies. Errors are swallowed. The bid always continues.
+Fail-open is on you, not on the framework. A hook that throws is recorded and the request is dropped, so catch what you expect to fail and return `ctx` instead. Nothing is swallowed for you.
 
-**Stateful.** Depends on external state like Redis or a database. Must be fail-open: if the external service is unreachable, the hook returns `ctx`. A bid is never blocked because of infrastructure.
+### Docs
 
-Beyond hooks, **services** handle what does not fit a per-request model — HTTP endpoints, callbacks, shared clients. They live in `services/`, register by name, and bind to HTTP routes. Features and services are both auto-loaded from their directories, so adding either is dropping a folder.
+- [docs/framework.md](docs/framework.md) — hooks, the injector, building features
+- [docs/metrics.md](docs/metrics.md) — Prometheus, Grafana
+- [docs/deployment.md](docs/deployment.md) — deploying to production
+- [CONTRIBUTING.md](CONTRIBUTING.md) — how to contribute, and how review works
 
-Read [docs/framework.md](docs/framework.md) for the full guide on hooks, the injector, services, and building features.
-
----
-
-## Getting started
-
-```bash
-cp config.example.json config.json
-node index.js    # run locally
-npm test         # run tests
-```
-
----
-
-## Docs
-
-| | |
-|--|--|
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Branch rules, what you can change |
-| [docs/framework.md](docs/framework.md) | Hooks, injector, features |
-| [docs/metrics.md](docs/metrics.md) | Prometheus, Grafana |
-| [docs/deployment.md](docs/deployment.md) | Deploy to production |
+Questions and bug reports: [open an issue](https://github.com/xe-works/xdd-smash-open/issues).
 
 ## License
 
