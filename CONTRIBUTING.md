@@ -47,9 +47,16 @@ client fork inherits core, so a change there lands on all of them.
 
 ## Licensing of contributions
 
-The project is [Apache 2.0](LICENSE). By opening a pull request you certify that
-you wrote the change or otherwise have the right to submit it under that
-licence, and that you are willing for it to be distributed under it.
+The project is licensed under the [Apache License, Version 2.0](LICENSE).
+
+Unless explicitly stated otherwise, any contribution intentionally submitted
+for inclusion in this project is provided to xDD Group, UAB under the Apache
+License, Version 2.0, without additional terms or conditions, as described in
+Section 5 of the license.
+
+By submitting a contribution, you represent that you have the right to submit
+it under those terms. Do not submit material owned by an employer, client, or
+other third party unless you have the necessary permission.
 
 ## Security
 
