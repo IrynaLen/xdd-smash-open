@@ -131,3 +131,40 @@ test('handles missing device gracefully', () => {
   assert.equal(ctx.device.country, null);
   assert.equal(ctx.device.ua, null);
 });
+
+test('folds sua into the flat device fields it mirrors', () => {
+  const body = { imp: [], device: { sua: {
+    platform: { brand: 'Android', version: ['15', '0', '1'] },
+    browsers: [{ brand: 'Not/A)Brand' }, { brand: 'Chromium' }, { brand: 'Google Chrome' }],
+    mobile: 1,
+  } } };
+  const ctx = parse(body, signal);
+  assert.equal(ctx.device.os, 'Android');
+  assert.equal(ctx.device.osv, '15.0', 'patch component dropped');
+  assert.equal(ctx.device.type, 1, 'sua.mobile mapped into the devicetype enum');
+  assert.deepEqual(ctx.device.browsers, ['Not/A)Brand', 'Chromium', 'Google Chrome'],
+    'every brand kept — client hints inject a GREASE brand and do not guarantee its position');
+});
+
+test('plain device fields win over sua', () => {
+  const body = { imp: [], device: {
+    os: 'iOS', osv: '18.3', devicetype: 4,
+    sua: { platform: { brand: 'Android', version: ['15'] }, mobile: 0 },
+  } };
+  const ctx = parse(body, signal);
+  assert.equal(ctx.device.os, 'iOS');
+  assert.equal(ctx.device.osv, '18.3');
+  assert.equal(ctx.device.type, 4);
+});
+
+test('sua.mobile 0 maps to a personal computer', () => {
+  const ctx = parse({ imp: [], device: { sua: { mobile: 0 } } }, signal);
+  assert.equal(ctx.device.type, 2);
+});
+
+test('device fields stay null without sua or plain values', () => {
+  const ctx = parse({ imp: [], device: {} }, signal);
+  assert.equal(ctx.device.osv, null);
+  assert.equal(ctx.device.browsers, null);
+  assert.equal(ctx.device.type, null);
+});

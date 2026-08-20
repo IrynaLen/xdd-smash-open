@@ -26,8 +26,14 @@ export function parse(body, signal) {
       country: geo.country ?? null,
       region: geo.region ?? null,
       city: geo.city ?? null,
-      os: device.os ?? null,
-      type: device.devicetype ?? null,
+      // sua (OpenRTB 2.6 structured UA) folded into the flat fields it mirrors,
+      // so consumers never deal with two shapes for the same fact.
+      os: device.os ?? device.sua?.platform?.brand ?? null,
+      osv: device.osv ?? device.sua?.platform?.version?.slice(0, 2).join('.') ?? null,
+      type: device.devicetype ?? (device.sua?.mobile != null ? (device.sua.mobile ? 1 : 2) : null),
+      // All brands, not the first: client hints deliberately inject a GREASE
+      // brand and do not guarantee where the real one sits.
+      browsers: device.sua?.browsers?.map(b => b.brand).filter(Boolean) ?? null,
       make: device.make ?? null,
       model: device.model ?? null,
       ua: device.ua ?? null,

@@ -13,6 +13,18 @@ export function readJson(filePath) {
   }
 }
 
+const isPlainObject = v => v !== null && typeof v === 'object' && !Array.isArray(v);
+
+// Arrays and nulls replace, they never merge.
+export function mergeConfig(base, over) {
+  if (over === undefined) return base;
+  if (!isPlainObject(base) || !isPlainObject(over)) return over;
+
+  const out = { ...base };
+  for (const [key, value] of Object.entries(over)) out[key] = mergeConfig(base[key], value);
+  return out;
+}
+
 export function setPath(obj, path, value) {
   const parts = path.split('.');
   let cur = obj;

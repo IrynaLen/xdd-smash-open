@@ -86,6 +86,8 @@ export class BidContext {
     this.device = {
       country: null,
       os: null,
+      osv: null,
+      browsers: null,
       type: null,
       make: null,
       model: null,
@@ -160,6 +162,16 @@ export class BidContext {
     this._patches = []; // { path, value } — imp.X patches broadcast to ALL imps
     this._headers = {};
     this._endpoint = null;
+    this._trackExt = null; // lazy — most requests never track
+  }
+
+  // Feature data for the tracking token, read back via tracking.addConsumer.
+  // Nested on purpose: A/B labels resolve by flat lookup, so nesting keeps
+  // high-cardinality feature data out of Prometheus labels.
+  track(namespace, data) {
+    this._trackExt ??= {};
+    this._trackExt[namespace] = { ...this._trackExt[namespace], ...data };
+    return this;
   }
 
   // Shortcut: first impression (adapters use this in single-imp flow)
@@ -201,6 +213,9 @@ export class BidContext {
       const fn = CONTEXT_FIELDS[f];
       if (fn) out[f] = fn(this, res);
     }
+    // Independent of `fields` — a feature must not be silently broken by an
+    // operator leaving it out of contextFields.
+    if (this._trackExt) out.ext = this._trackExt;
     return out;
   }
 }

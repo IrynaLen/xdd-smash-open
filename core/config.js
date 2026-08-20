@@ -1,4 +1,4 @@
-import { readJson } from './utils.js';
+import { readJson, mergeConfig } from './utils.js';
 
 // Load config with a two-level merge:
 //   1. Built-in defaults — per-adapter/tool config.json (checked in, always present)
@@ -25,7 +25,7 @@ export function loadConfig(builtinPath, globalPath, namespace) {
     if (global) {
       const section = getByNamespace(global, namespace);
       if (section && typeof section === 'object') {
-        config = { ...config, ...section };
+        config = mergeConfig(config, section);
       }
     }
   }
@@ -40,7 +40,7 @@ function getByNamespace(obj, namespace) {
 // Overlay per-request A/B overrides for `namespace` (set on ctx by the selector).
 export function resolveConfig(ctx, cfg, namespace) {
   const overrides = ctx?.configOverrides?.[namespace];
-  return overrides ? { ...cfg, ...overrides } : cfg;
+  return overrides ? mergeConfig(cfg, overrides) : cfg;
 }
 
 // The A/B variant overriding `namespace` this request, or 'none' — for metric labels.

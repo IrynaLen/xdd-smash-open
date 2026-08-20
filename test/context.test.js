@@ -40,3 +40,33 @@ test('res-derived fields read from the bid response', () => {
 test('endpoint fields map to the seat endpointId', () => {
   assert.deepEqual(makeCtx().serialize(RES, ['dspEndpoint']), { dspEndpoint: 'ep1' });
 });
+
+test('track() carries feature data into the token under ext', () => {
+  const ctx = makeCtx();
+  ctx.track('iiq', { abTestUuid: 'u-1' });
+  ctx.track('iiq', { dpi: '123' });
+  ctx.track('other', { a: 1 });
+
+  const out = ctx.serialize(RES);
+  assert.deepEqual(out.ext, { iiq: { abTestUuid: 'u-1', dpi: '123' }, other: { a: 1 } });
+});
+
+test('track() data survives a field list that does not mention it', () => {
+  // A feature must not be silently disabled by an operator trimming contextFields.
+  const ctx = makeCtx();
+  ctx.track('iiq', { abTestUuid: 'u-1' });
+  assert.deepEqual(ctx.serialize(RES, ['price']).ext, { iiq: { abTestUuid: 'u-1' } });
+});
+
+test('serialize() omits ext entirely when nothing tracked', () => {
+  assert.equal('ext' in makeCtx().serialize(RES), false);
+});
+
+test('tracked data stays nested, so it cannot be addressed as a flat metric label', () => {
+  // A/B recorders resolve labels by flat lookup on the serialized record.
+  const ctx = makeCtx();
+  ctx.track('iiq', { abTestUuid: 'unique-per-response' });
+  const out = ctx.serialize(RES);
+  assert.equal(out.abTestUuid, undefined);
+  assert.equal(out['ext.iiq.abTestUuid'], undefined);
+});

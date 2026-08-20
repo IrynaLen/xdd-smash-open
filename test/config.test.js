@@ -130,3 +130,36 @@ test('resolveConfig only overlays the matching namespace', () => {
   const ctx = { configOverrides: { impFeedback: { creativeTypes: {} } } };
   assert.equal(resolveConfig(ctx, cfg, 'userDedup'), cfg);
 });
+
+test('a nested section overrides by field instead of replacing wholesale', () => {
+  const t = tmp();
+  t.write('builtin.json', { regions: { us: { host: 'default-us', dpi: '' }, eu: { host: 'default-eu', dpi: '' } }, ttlMs: 1000 });
+  t.write('global.json', { feat: { regions: { us: { dpi: '111' } } } });
+
+  const cfg = loadConfig(resolve(t.dir, 'builtin.json'), resolve(t.dir, 'global.json'), 'feat');
+  assert.deepEqual(cfg.regions.us, { host: 'default-us', dpi: '111' }, 'host survives');
+  assert.deepEqual(cfg.regions.eu, { host: 'default-eu', dpi: '' }, 'untouched sibling survives');
+  assert.equal(cfg.ttlMs, 1000);
+  t.cleanup();
+});
+
+test('arrays and nulls replace rather than merge', () => {
+  const t = tmp();
+  t.write('builtin.json', { targets: [{ a: 1 }, { b: 2 }], nested: { keep: 1 } });
+  t.write('global.json', { feat: { targets: [{ c: 3 }], nested: null } });
+
+  const cfg = loadConfig(resolve(t.dir, 'builtin.json'), resolve(t.dir, 'global.json'), 'feat');
+  assert.deepEqual(cfg.targets, [{ c: 3 }], 'array replaced, not concatenated or merged by index');
+  assert.equal(cfg.nested, null);
+  t.cleanup();
+});
+
+test('resolveConfig merges an A/B override by field too', () => {
+  const cfg = { regions: { us: { host: 'h', dpi: '1' } }, awaitFetch: true };
+  const ctx = { configOverrides: { feat: { regions: { us: { dpi: '2' } }, awaitFetch: false } } };
+
+  const out = resolveConfig(ctx, cfg, 'feat');
+  assert.deepEqual(out.regions.us, { host: 'h', dpi: '2' });
+  assert.equal(out.awaitFetch, false);
+  assert.equal(cfg.regions.us.dpi, '1', 'the base config is not mutated');
+});
