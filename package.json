@@ -1,0 +1,21 @@
+{
+  "name": "xdd-smash",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node --test 'test/**/*.test.js' 'test/*.test.js'",
+    "lint": "eslint ."
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "prom-client": "^15.1.3",
+    "redis": "^5.12.1"
+  },
+  "devDependencies": {
+    "eslint": "^10.3.0"
+  }
+}

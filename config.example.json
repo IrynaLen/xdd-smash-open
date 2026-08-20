@@ -1,0 +1,73 @@
+{
+  "port": 3000,
+  "metricsToken": "",
+  "adapters": {
+    "magnite": {
+      "params": {
+        "accountId": "",
+        "siteId": "",
+        "username": "",
+        "password": ""
+      }
+    },
+    "appnexus": {
+      "params": {
+        "placementId": ""
+      }
+    },
+    "triplelift": {
+      "params": {
+        "inventoryCode": ""
+      }
+    },
+    "criteo": {
+      "params": {
+        "networkId": ""
+      }
+    }
+  },
+  "geoedge": {
+    "enabled": false,
+    "key": ""
+  },
+  "userDedup": {
+    "enabled": false,
+    "redisUrl": "",
+    "ttlMs": 60000,
+    "targets": [{}]
+  },
+  "tracking": {
+    "enabled": false,
+    "route": "/t",
+    "endpointUrl": "",
+    "cdnScriptUrl": "",
+    "activeKeyid": 1,
+    "keyring": { "1": "" }
+  },
+  "impFeedback": {
+    "enabled": false,
+    "creativeTypes": { "display": true, "video": true, "native": true },
+    "targets": [{}],
+    "contextFields": ["req", "ts", "dsp", "ssp", "price", "crid", "experiment", "pipeline"]
+  },
+  "abTesting": {
+    "enabled": false,
+    "experiments": [
+      {
+        "id": "dedup-ttl",
+        "salt": "dedup-ttl-2026-08",
+        "metrics": [
+          { "on": "postbid-dsp", "labels": ["experiment", "variant", "dsp"], "observe": [{ "field": "price", "as": "sum" }] },
+          { "on": "impression", "labels": ["experiment", "variant", "dsp"], "observe": [{ "field": "price", "as": "sum" }] }
+        ],
+        "variants": [
+          { "name": "dedup60", "weight": 50, "config": { "userDedup": { "ttlMs": 60000 } } },
+          { "name": "dedup10", "weight": 50, "config": { "userDedup": { "ttlMs": 10000 } } }
+        ]
+      }
+    ]
+  },
+  "pipeline": {
+    "overheadMs": 5
+  }
+}

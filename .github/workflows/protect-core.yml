@@ -1,0 +1,17 @@
+name: Protect core
+
+on:
+  pull_request:
+    paths:
+      - 'core/**'
+
+jobs:
+  block:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Block core changes from forks
+        if: github.event.pull_request.head.repo.fork == true
+        run: |
+          echo "::error::Changes to core/ are not allowed from forks."
+          echo "::error::Submit a proposal to xe-works/xdd-smash and we will integrate it."
+          exit 1
