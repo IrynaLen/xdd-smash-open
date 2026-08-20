@@ -61,4 +61,4 @@ Questions and bug reports: [open an issue](https://github.com/xe-works/xdd-smash
 
 ## License
 
-[Apache 2.0](LICENSE). The framework is open; feature modules, deployments and support are offered separately.
+[Apache 2.0](LICENSE). The framework is open; feature modules, deployments/hosting and support are offered separately.
