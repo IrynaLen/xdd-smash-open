@@ -13,5 +13,5 @@ jobs:
         if: github.event.pull_request.head.repo.fork == true
         run: |
           echo "::error::Changes to core/ are not allowed from forks."
-          echo "::error::Submit a proposal to xe-works/xdd-smash and we will integrate it."
+          echo "::error::Open an issue at github.com/xe-works/xdd-smash-open and we will integrate it."
           exit 1

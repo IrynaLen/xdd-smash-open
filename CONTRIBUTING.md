@@ -12,7 +12,7 @@ Core updates from xdd come through upstream sync. Your `main` branch stays up to
 
 Your work lives in `features/` (per-request hooks) and `services/` (HTTP endpoints, callbacks, shared clients). Read [docs/framework.md](docs/framework.md) to understand how features, services, and hooks work.
 
-`core/` is maintained by xdd and cannot be modified directly. If you need a change in `core/`, open an issue in [xe-works/xdd-smash](https://github.com/xe-works/xdd-smash/issues) describing your use case.
+`core/` is maintained by xdd and cannot be modified directly. If you need a change in `core/`, open an issue in [xe-works/xdd-smash-open](https://github.com/xe-works/xdd-smash-open/issues) describing your use case.
 
 **Branch rules:**
 
@@ -39,3 +39,11 @@ There are two hosting scenarios:
 | [docs/framework.md](docs/framework.md) | Hooks, injector, features |
 | [docs/metrics.md](docs/metrics.md) | Prometheus, Grafana |
 | [docs/deployment.md](docs/deployment.md) | Deploy to production |
+
+---
+
+## Licensing of contributions
+
+The project is [Apache 2.0](LICENSE). By opening a pull request you certify that
+you wrote the change or otherwise have the right to submit it under that
+licence, and that you are willing for it to be distributed under it.

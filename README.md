@@ -57,3 +57,7 @@ npm test         # run tests
 | [docs/framework.md](docs/framework.md) | Hooks, injector, features |
 | [docs/metrics.md](docs/metrics.md) | Prometheus, Grafana |
 | [docs/deployment.md](docs/deployment.md) | Deploy to production |
+
+## License
+
+[Apache 2.0](LICENSE). The framework is open; feature modules and support are offered separately.
