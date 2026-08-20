@@ -9,6 +9,7 @@ one review before it merges. That applies to us as much as to you.
 npm ci
 npm test
 npm run lint
+npm run coverage   # tests again, with thresholds
 ```
 
 Node 22 or newer. `package.json` still says `>=20`, but the test script hands
@@ -38,7 +39,8 @@ client fork inherits core, so a change there lands on all of them.
 - One branch per change, never push to `main` directly.
 - Tests and lint run on every PR and must pass.
 - Cover behaviour you add, and behaviour you fix. If a bug reached `main` once,
-  a test is the only thing stopping it reaching `main` twice.
+  a test is the only thing stopping it reaching `main` twice. Coverage has a
+  floor and CI enforces it; the floor exists to stop erosion, not as a target.
 - Say what changed and why in the description. The diff shows what; only you
   know why.
 - At least one review before merge.
