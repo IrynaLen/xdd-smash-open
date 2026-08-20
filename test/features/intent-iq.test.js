@@ -303,9 +303,12 @@ test('buildRdata omits abTestUuid rather than sending an empty one', () => {
   assert.equal('abTestUuid' in r, false);
 });
 
+// URLSearchParams is not in the eslint globals allowlist; URL is.
+const params = path => new URL(`https://h${path}`).searchParams;
+
 test('s2sPath carries the static params, the dpi and the identity', () => {
   const p = s2sPath('123', { ip: '1.2.3.4', uas: 'Mozilla/5.0 (X)', pcid: 'ABC', idtype: 4 });
-  const q = new URLSearchParams(p.split('?')[1]);
+  const q = params(p);
 
   assert.equal(p.split('?')[0], '/profiles_engine/ProfilesEngineServlet');
   assert.equal(q.get('at'), '39');
@@ -319,16 +322,16 @@ test('s2sPath carries the static params, the dpi and the identity', () => {
 });
 
 test('s2sPath declares iiqidtype only alongside an iiquid', () => {
-  const withUid = new URLSearchParams(s2sPath('1', { iiquid: 'UID' }).split('?')[1]);
+  const withUid = params(s2sPath('1', { iiquid: 'UID' }));
   assert.equal(withUid.get('iiqidtype'), '2', 'the docs require the pair to travel together');
 
-  const without = new URLSearchParams(s2sPath('1', { ip: '1.1.1.1' }).split('?')[1]);
+  const without = params(s2sPath('1', { ip: '1.1.1.1' }));
   assert.equal(without.get('iiqidtype'), null);
 });
 
 test('reportPath url-encodes rdata as one JSON value', () => {
   const rdata = { bidderCode: 'pubmatic', cpm: 1.18, currency: 'USD', abTestUuid: 'a-b-c' };
-  const q = new URLSearchParams(reportPath('123', rdata).split('?')[1]);
+  const q = params(reportPath('123', rdata));
 
   assert.equal(q.get('at'), '45');
   assert.equal(q.get('rtype'), '1');
