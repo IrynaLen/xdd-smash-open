@@ -1,0 +1,14 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  # Action versions go stale silently and only surface as runner deprecation
+  # warnings, so keep them updated too.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
