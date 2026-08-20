@@ -10,7 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Block core changes from forks
-        if: github.event.pull_request.head.repo.fork == true
+        # Private only. A public contributor can only ever open a pull request
+        # from a fork, so on the mirror this would block every outside change to
+        # core — the opposite of why it is published.
+        if: github.event.pull_request.head.repo.fork == true && github.event.repository.private == true
         run: |
           echo "::error::Changes to core/ are not allowed from forks."
           echo "::error::Open an issue at github.com/xe-works/xdd-smash-open and we will integrate it."
