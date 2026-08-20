@@ -12,8 +12,7 @@ npm run lint
 npm run coverage   # tests again, with thresholds
 ```
 
-Node 22 or newer. `package.json` still says `>=20`, but the test script hands
-glob patterns to `node --test` and those are only expanded from Node 21 on.
+Node 22 or newer — `package.json` `engines` now says so too.
 
 ## Where code goes
 

@@ -6,12 +6,12 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "node --test 'test/**/*.test.js' 'test/*.test.js'",
+    "test": "node --test \"test/**/*.test.js\" \"test/*.test.js\"",
     "lint": "eslint .",
-    "coverage": "node --test --experimental-test-coverage --test-coverage-exclude='test/**' --test-coverage-lines=90 --test-coverage-branches=84 --test-coverage-functions=85 'test/**/*.test.js' 'test/*.test.js'"
+    "coverage": "node --test --experimental-test-coverage --test-coverage-exclude=\"test/**\" --test-coverage-lines=90 --test-coverage-branches=84 --test-coverage-functions=85 \"test/**/*.test.js\" \"test/*.test.js\""
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "dependencies": {
     "prom-client": "^15.1.3",
