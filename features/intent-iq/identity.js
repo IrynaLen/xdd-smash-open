@@ -63,13 +63,6 @@ function formOf(device) {
   return 'desktop';
 }
 
-// From the protocol: bundle is app-only, page is site-only.
-export function surfaceOf(ctx) {
-  if (ctx.publisher?.bundle) return 'app';
-  if (ctx.content?.page) return 'site';
-  return 'surface?';
-}
-
 // Coarse components instead of the raw UA, so a patch-version bump does not
 // mint a new cache entry. UA only fills what the protocol left empty.
 export function cohortOf(ctx) {
@@ -80,7 +73,7 @@ export function cohortOf(ctx) {
   const os = d.os ? slug(d.os) : ua?.name ?? 'os?';
   const osv = d.osv ? d.osv.split('.').slice(0, 2).join('.') : ua?.version ?? '?';
 
-  return `${os}_${osv}_${formOf(d)}_${engineOf(d)}_${surfaceOf(ctx)}_${d.ip}`;
+  return `${os}_${osv}_${formOf(d)}_${engineOf(d)}_${ctx.inventory ?? 'inv?'}_${d.ip}`;
 }
 
 function eidValue(eids, source) {

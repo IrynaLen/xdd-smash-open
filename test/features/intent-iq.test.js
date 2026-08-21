@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { resolveRegion, COUNTRY_REGION, DEFAULT_HOSTS } from '../../features/intent-iq/regions.js';
-import { cacheKeyFor, cohortOf, surfaceOf, identityFor, hasRealIfa, IDTYPE } from '../../features/intent-iq/identity.js';
+import { cacheKeyFor, cohortOf, identityFor, hasRealIfa, IDTYPE } from '../../features/intent-iq/identity.js';
 import { createThrottle } from '../../features/intent-iq/throttle.js';
 import { ttlFor, abTestUuidFor, entryFor } from '../../features/intent-iq/cache.js';
 import { buildRdata, createConsumer } from '../../features/intent-iq/reporting.js';
@@ -31,8 +31,8 @@ const REGIONS = {
   eu: { host: 'custom-gdpr.example', dpi: '333' },
 };
 
-function ctx({ device = {}, user = {}, publisher = {}, content = {}, ssp = { id: '100' } } = {}) {
-  return { device, user, publisher, content, ssp };
+function ctx({ device = {}, user = {}, publisher = {}, content = {}, ssp = { id: '100' }, inventory = null } = {}) {
+  return { device, user, publisher, content, ssp, inventory };
 }
 
 test('resolveRegion maps a country to its region, host and dpi', () => {
@@ -80,7 +80,7 @@ test('cacheKeyFor prefers the IFA tier and normalises case', () => {
 test('cacheKeyFor falls back to the cohort tier without an IFA', () => {
   const k = cacheKeyFor(ctx({
     device: { ifa: '00000000-0000-0000-0000-000000000000', ip: '203.0.113.42', os: 'iOS', osv: '17.5.1', type: 4, browsers: ['Safari'] },
-    content: { page: 'https://example.com' },
+    inventory: 'site',
   }));
   assert.equal(k.tier, 'cohort');
   assert.equal(k.key, 'iiq:ua:ios_17.5_mobile_webkit_site_203.0.113.42');
@@ -129,7 +129,7 @@ test('cohort drops the patch version so a point release does not fragment the ca
 
 test('cohort falls back to the user agent only for what the protocol left empty', () => {
   const ua = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148';
-  const key = cohortOf(ctx({ device: { ip: '9.9.9.9', ua }, publisher: { bundle: 'com.app' } }));
+  const key = cohortOf(ctx({ device: { ip: '9.9.9.9', ua }, inventory: 'app' }));
   assert.equal(key, 'ios_18.3_mobile_webkit_app_9.9.9.9');
 });
 
@@ -137,10 +137,23 @@ test('cohort is null without an ip', () => {
   assert.equal(cohortOf(ctx({ device: { os: 'iOS', osv: '17.0' } })), null);
 });
 
-test('surfaceOf reads app vs site from the protocol, not the user agent', () => {
-  assert.equal(surfaceOf(ctx({ publisher: { bundle: 'com.app' } })), 'app');
-  assert.equal(surfaceOf(ctx({ content: { page: 'https://x.com' } })), 'site');
-  assert.equal(surfaceOf(ctx()), 'surface?');
+test('cohort takes app vs site from ctx.inventory, not from optional fields', () => {
+  const base = { ip: '1.1.1.1', os: 'iOS', osv: '17.0', type: 4, browsers: ['Safari'] };
+  const at = key => key.split('_')[4];
+
+  // bundle and page are optional, so an app request that omits bundle must
+  // still read as app — the old guess returned neither.
+  assert.equal(at(cohortOf({ ...ctx({ device: base }), inventory: 'app' })), 'app');
+  assert.equal(at(cohortOf({ ...ctx({ device: base }), inventory: 'site' })), 'site');
+  assert.equal(at(cohortOf({ ...ctx({ device: base }), inventory: 'dooh' })), 'dooh');
+  assert.equal(at(cohortOf(ctx({ device: base }))), 'inv?', 'no inventory object at all');
+});
+
+test('cohort no longer depends on publisher.bundle or content.page', () => {
+  const base = { ip: '1.1.1.1', os: 'iOS', osv: '17.0', type: 4, browsers: ['Safari'] };
+  const withFields = { ...ctx({ device: base, publisher: { bundle: 'com.app' } }), inventory: 'app' };
+  const without = { ...ctx({ device: base }), inventory: 'app' };
+  assert.equal(cohortOf(withFields), cohortOf(without), 'same device, same key either way');
 });
 
 test('identityFor sends idtype 4 with an uppercased IFA', () => {
