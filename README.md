@@ -20,7 +20,7 @@ A bidder. It sits between your ad management platform and your demand, runs a pi
 SSP / SDK / etc -> Optional Ad management platform (e.g. XE) -> xdd-smash -> DSP / demand
 ```
 
-It ships integrated with XE, an ad management platform, which brings ready-made features that are not part of the core. The core is a general framework: write features as hooks, drop a folder, and it is picked up at startup.
+It ships integrated with XE, an ad management platform, which brings ready-made features that are not part of the core. 
 
 ---
 
