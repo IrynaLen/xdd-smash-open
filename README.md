@@ -20,7 +20,7 @@ A proxy RTB bidder. It sits between your ad management platform and your demand,
 SSP / SDK / etc -> Ad management platform (e.g. XE) -> xdd-smash -> DSP / demand
 ```
 
-It ships integrated with XE, an ad management platform, which brings ready-made features that are not part of the core. The core is a general framework: write features as hooks, drop a folder, and it is picked up at startup. There is no central file to edit.
+It ships integrated with XE, an ad management platform, which brings ready-made features that are not part of the core. The core is a general framework: write features as hooks, drop a folder, and it is picked up at startup.
 
 ---
 
@@ -61,4 +61,14 @@ Questions and bug reports: [open an issue](https://github.com/xe-works/xdd-smash
 
 ## License
 
-[Apache 2.0](LICENSE). The framework is open; feature modules and support are offered separately.
+Copyright 2026 xDD Group, UAB.
+
+This project is licensed under the [Apache License, Version 2.0](LICENSE).
+
+Unless otherwise explicitly stated, the license applies to all source code,
+feature modules, services, tests, documentation, and other material contained
+in this repository.
+
+Additional modules, integrations, managed hosting, implementation services,
+and support not contained in this repository may be offered separately under
+commercial terms.
