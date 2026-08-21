@@ -110,9 +110,13 @@ export function identityFor(ctx) {
   const ref = ctx.publisher?.bundle ?? ctx.publisher?.domain ?? ctx.publisher?.name;
   if (ref) identity.ref = ref;
 
+  // Sent as received. Their footnote puts the uppercase rule on IDFV only, and
+  // an AAID is conventionally lower case — normalising it would send an id no
+  // other integration sends. The cache key uppercases separately, to collapse
+  // case variants of one device into one entry.
   if (hasRealIfa(d.ifa)) {
     identity.idtype = CTV_TYPES.has(d.type) ? IDTYPE.CTV : IDTYPE.IFA;
-    identity.pcid = d.ifa.toUpperCase();
+    identity.pcid = d.ifa;
   } else if (ctx.user?.id) {
     identity.idtype = IDTYPE.COOKIE;
     identity.pcid = ctx.user.id;

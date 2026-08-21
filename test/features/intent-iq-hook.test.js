@@ -202,7 +202,7 @@ test('a fetch attaches eids, caches them, and records the account that fetched',
 
   assert.equal(fetch.calls[0].host, 'be-api-s2s.intentiq.com');
   assert.equal(fetch.calls[0].dpi, '111');
-  assert.equal(fetch.calls[0].identity.pcid, 'DEVICE-1');
+  assert.equal(fetch.calls[0].identity.pcid, 'device-1', 'pcid sent as received');
   assert.deepEqual(c.patch('user.ext.eids'), EIDS);
 
   const [write] = redis.calls.set;

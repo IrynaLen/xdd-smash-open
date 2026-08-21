@@ -156,12 +156,21 @@ test('cohort no longer depends on publisher.bundle or content.page', () => {
   assert.equal(cohortOf(withFields), cohortOf(without), 'same device, same key either way');
 });
 
-test('identityFor sends idtype 4 with an uppercased IFA', () => {
+test('identityFor sends the IFA exactly as received', () => {
+  // Their footnote puts the uppercase rule on IDFV alone, and an AAID is
+  // conventionally lower case, so normalising it would send an id nobody else
+  // sends and fail to resolve.
   const identity = identityFor(ctx({ device: { ifa: 'aaaa-bbbb', ip: '1.2.3.4', ua: 'UA' } }));
   assert.equal(identity.idtype, IDTYPE.IFA);
-  assert.equal(identity.pcid, 'AAAA-BBBB');
+  assert.equal(identity.pcid, 'aaaa-bbbb');
   assert.equal(identity.ip, '1.2.3.4');
   assert.equal(identity.uas, 'UA');
+});
+
+test('the cache key still folds case, even though the outgoing pcid does not', () => {
+  const lower = cacheKeyFor(ctx({ device: { ifa: 'aaaa-bbbb' } }));
+  const upper = cacheKeyFor(ctx({ device: { ifa: 'AAAA-BBBB' } }));
+  assert.deepEqual(lower, upper, 'one device, one entry');
 });
 
 test('identityFor sends idtype 8 for CTV and 0 for a site user id', () => {
@@ -334,12 +343,15 @@ test('s2sPath carries the static params, the dpi and the identity', () => {
   assert.equal(q.get('idtype'), '4');
 });
 
-test('s2sPath declares iiqidtype only alongside an iiquid', () => {
-  const withUid = params(s2sPath('1', { iiquid: 'UID' }));
-  assert.equal(withUid.get('iiqidtype'), '2', 'the docs require the pair to travel together');
-
-  const without = params(s2sPath('1', { ip: '1.1.1.1' }));
-  assert.equal(without.get('iiqidtype'), null);
+test('s2sPath sends iiquid without iiqidtype', () => {
+  // iiqidtype describes iiqpcid, the browser-side first-party id, and the docs
+  // require iiqpcid, iiqidtype and iiqpciddate to travel together. We have no
+  // first-party id server-side, so sending one of the three alone was wrong.
+  const q = params(s2sPath('1', { iiquid: 'UID' }));
+  assert.equal(q.get('iiquid'), 'UID');
+  assert.equal(q.get('iiqidtype'), null);
+  assert.equal(q.get('iiqpcid'), null);
+  assert.equal(q.get('iiqpciddate'), null);
 });
 
 test('reportPath url-encodes rdata as one JSON value', () => {

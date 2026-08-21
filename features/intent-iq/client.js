@@ -54,7 +54,6 @@ function get(host, path, headers, timeoutMs) {
 export function s2sPath(dpi, identity) {
   const parts = [...S2S_STATIC, ['dpi', dpi]];
   for (const [k, v] of Object.entries(identity)) parts.push([k, v]);
-  if (identity.iiquid) parts.push(['iiqidtype', 2]);
   return `${PATH}?${query(parts)}`;
 }
 
