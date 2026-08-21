@@ -14,7 +14,7 @@ Trust in programmatic cannot be audited from the outside — you see what you se
 
 ## What it is
 
-A proxy RTB bidder. It sits between your ad management platform and your demand, runs a pipeline on every bid request, and returns the result.
+A bidder. It sits between your ad management platform and your demand, runs a pipeline on every bid request, and returns the result.
 
 ```
 SSP / SDK / etc -> Ad management platform (e.g. XE) -> xdd-smash -> DSP / demand
