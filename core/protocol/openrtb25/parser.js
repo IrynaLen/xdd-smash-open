@@ -20,6 +20,11 @@ export function parse(body, signal) {
     tmax: body.tmax ?? 0,
     raw: body,
 
+    // Which of the mutually exclusive inventory objects the request carries.
+    // Derived facts like publisher.bundle and content.page are optional, so
+    // they cannot stand in for this.
+    inventory: body.app ? 'app' : body.site ? 'site' : body.dooh ? 'dooh' : null,
+
     impressions: parseImpressions(body.imp ?? []),
 
     device: {
