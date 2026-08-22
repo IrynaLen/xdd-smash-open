@@ -52,10 +52,13 @@ function withNativeRequest(imp) {
 }
 
 export class BidContext {
-  constructor({ ssp, dsp, destination, impressions, device, user, publisher, privacy, content, signals, tmax, raw }) {
+  constructor({ ssp, dsp, destination, inventory, impressions, device, user, publisher, privacy, content, signals, tmax, raw }) {
     this.ssp = ssp;
     this.dsp = dsp;
     this.destination = destination;
+
+    // 'app' | 'site' | 'dooh' | null — which inventory object the request carried
+    this.inventory = inventory ?? null;
 
     // Array of impressions — pipeline works with [0], but patches broadcast to all
     this.impressions = (impressions ?? []).map(imp => withNativeRequest({

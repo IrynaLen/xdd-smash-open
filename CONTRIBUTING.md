@@ -65,7 +65,7 @@ current without touching your feature work.
 There are two hosting arrangements. If **xdd hosts**, we manage the
 infrastructure and own uptime; deployment follows review, and a PR is not
 deployed until it is approved. If **you host**, infrastructure and deployments
-are yours. 
+are yours. Which one applies is agreed at contract time.
 
 | | |
 |--|--|

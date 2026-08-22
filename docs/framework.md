@@ -102,6 +102,11 @@ ctx.ssp.endpointId      // SSP endpoint id on the XE platform
 ctx.ssp.knownBidder     // matched ssp/ directory name, null if not recognized
 ctx.ssp.params          // per-request SSP params from ext.smash.ssp.params
 
+// Inventory — which of the mutually exclusive objects the request carried.
+// 'app' | 'site' | 'dooh' | null. Read this rather than guessing from
+// publisher.bundle or content.page, which are both optional.
+ctx.inventory
+
 // Impression (single-imp shortcut — adapters work with impressions[0])
 ctx.impression.isBanner
 ctx.impression.isVideo
@@ -124,9 +129,14 @@ ctx.impression.nativeAssets     // request.assets
 ctx.impression.nativePlcmttype  // request.plcmttype
 ctx.impression.nativeContext    // request.context
 
-// Device / user
+// Device / user. Structured user agent (device.sua, OpenRTB 2.6) is folded into
+// the flat fields it mirrors, so a hook never handles two shapes for one fact.
+// A plain field always wins over the sua value it duplicates.
 ctx.device.country
 ctx.device.os
+ctx.device.osv          // device.osv, else sua.platform.version as major.minor
+ctx.device.type         // device.devicetype enum, else derived from sua.mobile
+ctx.device.browsers     // every sua brand in order, null if absent
 ctx.device.ifa
 ctx.device.ua
 ctx.device.ip
@@ -190,6 +200,16 @@ if (ctx.signals.blockAdult) {
 }
 ```
 
+### Tracking feature data
+
+`ctx.track(namespace, data)` attaches feature data to the tracking token, to be read back by a tracking consumer when the impression fires. Repeated calls on one namespace merge.
+
+```js
+ctx.track('userDedup', { seen: true, source: 'redis' });
+```
+
+It is serialized under `ext.<namespace>` regardless of the `contextFields` config, so an operator leaving a field out of that list cannot silently break a feature. The namespace nesting is deliberate: A/B metric labels resolve by flat lookup, so nesting keeps high-cardinality feature data out of Prometheus labels.
+
 ---
 
 ## Injector
@@ -236,7 +256,7 @@ dsp/appnexus/seat-123.prebid-dsp.js score 2  (bidder + seat)
 
 ### Adapter config
 
-Each adapter directory can have a `config.json` with built-in defaults. The root `config.json` overrides them by namespace. Per-request params from `ext.smash.dsp.params` win last.
+Each adapter directory can have a `config.json` with built-in defaults. The root `config.json` merges over them field by field, so a deployment can override one value inside a nested section without restating the rest of it. Arrays and `null` replace rather than merge. Per-request params from `ext.smash.dsp.params` win last.
 
 ```
 dsp/magnite/config.json             built-in defaults
@@ -266,7 +286,7 @@ Features live in `features/<name>/` and self-register into the pipeline via a `r
 
 ### Stateless
 
-A stateless feature enriches or filters requests with no external dependencies. If it throws or returns `null`, the bid continues anyway. Use this pattern for anything that should never block a bid.
+A stateless feature enriches or filters requests with no external dependencies. Use this pattern for anything that should never block a bid — which makes failure handling the feature's own job. The framework does not swallow exceptions: a hook that throws is recorded in `ctx.meta.errors` and the request ends as a no-bid, exactly as if it had returned `null`. A feature that must not block a bid therefore wraps whatever can fail in `try`/`catch` and returns `ctx`.
 
 `features/geoedge-postbid/` is a reference implementation. It wraps banner creatives with an ad quality script in `postbid-ssp`. It is included as an example and starting point.
 
