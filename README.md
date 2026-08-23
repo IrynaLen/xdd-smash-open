@@ -24,12 +24,13 @@ A bidder. It sits between your ad management platform and your demand, runs a
 pipeline on every bid request, and returns the result.
 
 ```
-SSP / SDK / etc -> ad management platform (e.g. XE) -> xdd-smash -> DSP / demand
+SSP / SDK / etc -> ad management platform (e.g. Xeworks) -> xdd-smash -> DSP / demand
 ```
 
-It comes integrated with XE, an ad management platform. Nothing in `core/` is
-tied to XE, so it can sit behind something else, but the general guide for doing
-that is not written yet: [#25](https://github.com/xe-works/xdd-smash-open/issues/25).
+It comes integrated with [Xeworks](https://xe.works), an ad management platform.
+Nothing in `core/` is tied to Xeworks, so it can sit behind something else, but
+the general guide for doing that is not written yet:
+[#25](https://github.com/xe-works/xdd-smash-open/issues/25).
 
 `core/` is the framework and stays deliberately small. The features here are the
 ones a working bidder needs, plus reference implementations to copy from when
@@ -38,8 +39,8 @@ writing your own, and we keep adding to that free set.
 ### Latency
 
 Pipeline overhead depends on the deployment. On the deployments we run it is
-about 0.5 ms, measured from XE. For an independent deployment it depends on your
-topology and where the boxes sit, so ask us and we will work it out with you.
+about 0.5 ms, measured from Xeworks. For an independent deployment it depends on
+your topology and where the boxes sit, so ask us and we will work it out with you.
 
 ---
 
