@@ -8,7 +8,7 @@ The pipeline runs on every bid request. It has four stages. At each stage the fr
 
 Features are the unit of packaging. A feature is a directory in `features/` with one or more hooks and a `register(registry)` function. Features are either stateless (no external dependencies, always continue) or stateful (depend on Redis or similar, must be fail-open).
 
-The injector is a built-in feature. It simplifies the daily work of writing DSP and SSP adapters when integrating with XE. Instead of registering hooks manually, you drop a file in the right directory and the injector loads it at startup.
+The injector is a built-in feature. It simplifies the daily work of writing DSP and SSP adapters when integrating with [Xeworks](https://xe.works). Instead of registering hooks manually, you drop a file in the right directory and the injector loads it at startup.
 
 Not everything is a per-request hook. HTTP endpoints, callbacks, and shared long-lived clients are services. A service lives in a registry by name and binds to HTTP routes. Features and services are both auto-loaded from their directories at startup, so adding either is dropping a folder.
 
@@ -45,19 +45,19 @@ Not everything is a per-request hook. HTTP endpoints, callbacks, and shared long
 ## Pipeline
 
 ```
-XE  -->  xdd-smash
-              |
-         prebid-ssp      validate/block before doing anything
-              |
-         prebid-dsp      shape the outbound request, set auth headers
-              |
-         --- DSP ---     HTTP call to the DSP
-              |
-         postbid-dsp     validate/transform the DSP response
-              |
-         postbid-ssp     final processing before returning to XE
-              |
-XE  <--  response
+Xeworks  -->  xdd-smash
+                   |
+              prebid-ssp      validate/block before doing anything
+                   |
+              prebid-dsp      shape the outbound request, set auth headers
+                   |
+              --- DSP ---     HTTP call to the DSP
+                   |
+              postbid-dsp     validate/transform the DSP response
+                   |
+              postbid-ssp     final processing before returning to Xeworks
+                   |
+Xeworks  <--  response
 ```
 
 | Stage | When | Typical use |
@@ -65,7 +65,7 @@ XE  <--  response
 | `prebid-ssp` | Before DSP request is built | Validate SSP context, block bad traffic |
 | `prebid-dsp` | Before DSP request is sent | Add DSP fields, set auth headers |
 | `postbid-dsp` | After DSP responds | Validate bid, filter |
-| `postbid-ssp` | Before returning to XE | Final filtering, creative wrapping |
+| `postbid-ssp` | Before returning to Xeworks | Final filtering, creative wrapping |
 
 ---
 
@@ -90,15 +90,15 @@ export default async function(ctx) { ... }
 ### Reading
 
 ```js
-// DSP — populated from ext.smash.dsp sent by XE
+// DSP — populated from ext.smash.dsp sent by Xeworks
 ctx.dsp.id              // DSP seat id (buyer account identifier at the DSP)
-ctx.dsp.endpointId      // DSP endpoint id on the XE platform
+ctx.dsp.endpointId      // DSP endpoint id on the Xeworks platform
 ctx.dsp.knownBidder     // matched dsp/ directory name, null if not recognized
 ctx.dsp.params          // per-request DSP params from ext.smash.dsp.params
 
-// SSP — populated from ext.smash.ssp sent by XE
-ctx.ssp.id              // SSP id on the XE platform
-ctx.ssp.endpointId      // SSP endpoint id on the XE platform
+// SSP — populated from ext.smash.ssp sent by Xeworks
+ctx.ssp.id              // SSP id on the Xeworks platform
+ctx.ssp.endpointId      // SSP endpoint id on the Xeworks platform
 ctx.ssp.knownBidder     // matched ssp/ directory name, null if not recognized
 ctx.ssp.params          // per-request SSP params from ext.smash.ssp.params
 
@@ -214,7 +214,7 @@ It is serialized under `ext.<namespace>` regardless of the `contextFields` confi
 
 ## Injector
 
-Injector is a built-in feature that simplifies writing DSP and SSP adapters when integrating with XE. It discovers and loads hooks from the filesystem automatically at startup. Drop a file in the right directory and it registers itself with no manual wiring.
+Injector is a built-in feature that simplifies writing DSP and SSP adapters when integrating with Xeworks. It discovers and loads hooks from the filesystem automatically at startup. Drop a file in the right directory and it registers itself with no manual wiring.
 
 ### Directory structure
 
@@ -450,19 +450,19 @@ export default function(ctx) {
 
 **Bid.** A response from a DSP that includes a price and a creative. The DSP sends a bid when it wants to buy an impression. No response or an empty response is a no-bid.
 
-**SSP (Supply-Side Platform).** The ad exchange or publisher platform that sends bid requests. In xdd-smash, SSP refers to the source of traffic coming through XE.
+**SSP (Supply-Side Platform).** The ad exchange or publisher platform that sends bid requests. In xdd-smash, SSP refers to the source of traffic coming through Xeworks.
 
 **DSP (Demand-Side Platform).** The buyer. An external ad platform that responds to bid requests with a price and a creative. xdd-smash calls the DSP over HTTP on every request.
 
-**Prebid.** Everything that happens before the DSP responds. Includes `prebid-ssp` (processing the incoming XE request) and `prebid-dsp` (shaping it for the DSP).
+**Prebid.** Everything that happens before the DSP responds. Includes `prebid-ssp` (processing the incoming Xeworks request) and `prebid-dsp` (shaping it for the DSP).
 
-**Postbid.** Everything that happens after the DSP responds. Includes `postbid-dsp` (processing the DSP response) and `postbid-ssp` (finalizing before returning to XE).
+**Postbid.** Everything that happens after the DSP responds. Includes `postbid-dsp` (processing the DSP response) and `postbid-ssp` (finalizing before returning to Xeworks).
 
 **Seat.** A buyer account identifier used by DSPs. `ctx.dsp.id` is the seat id. Used in injector file naming as `seat-N`.
 
-**Endpoint.** An integration point identified by the XE platform. `ctx.dsp.endpointId` is the ID of the DSP endpoint configured in XE. `ctx.ssp.endpointId` is the ID of the SSP endpoint in XE. Used in injector file naming as `ep-N`.
+**Endpoint.** An integration point identified by the Xeworks platform. `ctx.dsp.endpointId` is the ID of the DSP endpoint configured in Xeworks. `ctx.ssp.endpointId` is the ID of the SSP endpoint in Xeworks. Used in injector file naming as `ep-N`.
 
-**knownBidder.** The name of a recognized DSP or SSP. Maps to a directory under `features/injector/dsp/` or `features/injector/ssp/`. If XE does not pass a recognized name, it is `null` and only `_/` hooks run.
+**knownBidder.** The name of a recognized DSP or SSP. Maps to a directory under `features/injector/dsp/` or `features/injector/ssp/`. If Xeworks does not pass a recognized name, it is `null` and only `_/` hooks run.
 
 **IFA (Identifier for Advertising).** A device-level identifier used for targeting and frequency capping. Available as `ctx.device.ifa`.
 
@@ -474,7 +474,7 @@ export default function(ctx) {
 
 **Feature.** A directory in `features/` with one or more hooks and a `register(registry)` function. The unit of functionality in xdd-smash.
 
-**Injector.** A built-in feature that loads hooks from the filesystem by convention. The primary tool for writing DSP and SSP adapters when working with XE.
+**Injector.** A built-in feature that loads hooks from the filesystem by convention. The primary tool for writing DSP and SSP adapters when working with Xeworks.
 
 **ctx (BidContext).** The internal request model passed through the entire pipeline. Hooks never work with raw OpenRTB — only with `ctx`.
 
