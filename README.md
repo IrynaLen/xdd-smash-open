@@ -2,25 +2,23 @@
 
 Own your RTB stack.
 
-Vendors sell white-label: your logo, their black box, their roadmap. You cannot
-read the code, so you cannot verify what happens to your requests, and when
-something is wrong the consequences land on you, not on them. Their complexity
-is not an accident either. The harder the stack is to understand, the harder you
-are to replace.
+White-label vendors put your logo on their black box. You do not have access to the code, 
+so you cannot verify what happens to your requests, and when something goes wrong, 
+it goes wrong under your name, with your partners. Anything you need changed goes 
+into someone else's roadmap, behind someone else's customers.
 
-xdd-smash is the other option. An open framework you run yourself, on
-infrastructure you control, with nothing waiting on someone else's roadmap.
+xdd-smash is another way: an open framework you run yourself.
 
-**The complexity sits in the code, not in your process.** The framework absorbs
-the parts of RTB that are genuinely hard, so that building on it stays cheap: a
-feature is a function that takes a bid request and returns it. And you are not
-alone with it. We wrote this, and we are available to help.
+RTB has parts that are genuinely hard, and the framework absorbs them, so 
+that building on it stays cheap: a feature is a function that takes a bid request 
+and returns it. Two runtime dependencies, no build step, plain ES modules on Node 22. 
+Small enough for one developer to own. 
 
 ---
 
 ## What it is
 
-A bidder. It sits between your ad management platform and your demand, runs a
+A proxy RTB bidder. It sits between your ad management platform and your demand, runs a
 pipeline on every bid request, and returns the result.
 
 ```
@@ -52,6 +50,9 @@ Help is welcome there; it is the first thing anyone tries.
 
 Node 22 or newer, and the reference for the request shape is
 [docs/framework.md](docs/framework.md).
+
+Setup touches your supply, your demand and your infrastructure. 
+If something does not line up, open an issue for your case.
 
 ---
 
@@ -114,29 +115,31 @@ what the startup banner prints. DSP and SSP adapters usually skip all of this:
 drop `dsp/<bidder>/prebid-dsp.js` into `features/injector/` and the filename is
 the registration.
 
-Features come in two kinds, and the difference is failure:
+Features come in two kinds, and the difference is what can fail:
 
-- **Stateless** — no external dependencies, so there is little to fail.
-- **Stateful** — depends on Redis, a database, something over the network. Must
-  be fail-open: if the dependency is unreachable, return `ctx` untouched. A bid
-  is never lost to infrastructure.
+- **Stateless** — no external dependencies, so anything that throws
+  is a bug in your own code.
+- **Stateful** — depends on Redis, a database, something over the network.
+  Must be fail-open: if the dependency is unreachable, return `ctx`.
+  Done right, no bid is ever lost to infrastructure.
 
-Fail-open is on you, not on the framework. A hook that throws is recorded in
-`ctx.meta.errors` and the request ends as a no-bid, so catch what you expect to
-fail and return `ctx` instead. Nothing is swallowed for you.
+Failing open is on you, not on the framework — nothing is caught silently 
+on your behalf. If a hook throws, the error is recorded in `ctx.meta.errors` 
+and the request ends as a no-bid. So catch what you expect to fail, 
+leave a note in `ctx.meta.warnings` and return `ctx`. 
 
 ---
 
 ## Your features stay yours
 
-Apache 2.0 does not ask you to publish anything you build on it. In practice a
-client works in a private fork of this repository: the features that are your
-competitive edge live there, closed and owned by you, and they come back here
-only if you decide to contribute them.
+Apache 2.0 does not require you to publish anything you build on it. 
+You work in a private fork of this repository: the features that are your 
+competitive edge live there, closed and owned by you, and they come back 
+here only if you decide to contribute them.
 
-If you want us inside that fork, that is a contract and not a condition. Code
-review, custom feature development, deployment and hosting, or a second opinion
-on an integration. The framework runs without us. Write to dima@xe.works.
+The framework runs without us. You can bring us into that fork under contract 
+for code review, custom feature development, deployment, hosting, 
+or a second opinion on an integration. Write to dima@xe.works.
 
 ### Docs
 
