@@ -132,7 +132,7 @@ leave a note in `ctx.meta.warnings` and return `ctx`.
 
 ## Your features stay yours
 
-Apache 2.0 doesn't require you to publish anything you build on it. 
+Apache 2.0 does not require you to publish anything you build on it. 
 You work in a private fork of this repository: the features that are your 
 competitive edge live there, closed and owned by you, and they come back 
 here only if you decide to contribute them.
