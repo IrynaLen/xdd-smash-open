@@ -5,7 +5,7 @@ Shaping logic and floor decisions your platform has no field for.
 As an SSP, you already run the auction. The question is what it 
 costs you to change the logic behind the decisions around it.
 
-xdd-smash-open is a framework you run on your own infrastructure. 
+xdd-smash is a framework you run on your own infrastructure. 
 The logic you write is a plain function, and the framework takes 
 care of the rest: it runs on every call, keeps one function from 
 breaking another and decides what happens when one fails.
