@@ -23,6 +23,8 @@ Not everything is a per-request hook. HTTP endpoints, callbacks, and shared long
    - [Modifying the outbound request](#modifying-the-outbound-request-prebid-dsp)
    - [Modifying the bid response](#modifying-the-bid-response-postbid-dsp--postbid-ssp)
    - [Signals](#signals)
+   - [Tracking feature data](#tracking-feature-data)
+   - [Reporting back to the caller](#reporting-back-to-the-caller)
 4. [Injector](#injector)
    - [Directory structure](#directory-structure)
    - [File naming](#file-naming)
@@ -209,6 +211,25 @@ ctx.track('userDedup', { seen: true, source: 'redis' });
 ```
 
 It is serialized under `ext.<namespace>` regardless of the `contextFields` config, so an operator leaving a field out of that list cannot silently break a feature. The namespace nesting is deliberate: A/B metric labels resolve by flat lookup, so nesting keeps high-cardinality feature data out of Prometheus labels.
+
+### Reporting back to the caller
+
+Four channels reach the caller, all inside `ext.smash` of the response, and all present on a no-bid as well as on a normal one.
+
+```js
+ctx.report('creativeGuard', { rejected: [{ crid: 'cr1', reason: 'no adm' }] });
+ctx.meta.warnings.push({ feature: 'creative-guard', reason: 'no adm' });
+ctx.meta.blockReason = 'creative-guard: all bids rejected';
+```
+
+- **`ctx.report(namespace, data)`** — structured, feature-owned data, landing under `ext.smash.ext.<namespace>`. Repeated calls on one namespace merge. Use it for anything the caller is meant to parse. The namespace is the feature name, or the bidder name when the hook is an adapter.
+- **`ctx.meta.warnings`** — `{ feature, reason }`, for someone reading a log rather than for a parser.
+- **`ctx.meta.blockReason`** — a string, set alongside returning `null`. The pipeline fills in `blockedBy` with the stage by itself.
+- **`ctx.meta.errors`** — `{ stage, handler, error }`, pushed by the pipeline when a hook throws. Features do not write to it.
+
+Adapters use the same channels. An adapter is an ordinary hook and the injector only saves it the registration, so an adapter that blocks sets `blockReason` and returns `null` exactly as a feature does.
+
+`report` is the response counterpart of `track` above: same namespacing, but tracked data rides in the tracking token to the impression callback, while reported data goes back to the caller in the bid response.
 
 ---
 

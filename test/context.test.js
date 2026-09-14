@@ -70,3 +70,24 @@ test('tracked data stays nested, so it cannot be addressed as a flat metric labe
   assert.equal(out.abTestUuid, undefined);
   assert.equal(out['ext.iiq.abTestUuid'], undefined);
 });
+
+test('report() collects feature data under a namespace', () => {
+  const ctx = makeCtx();
+  assert.equal(ctx.report('creativeGuard', { rejected: 2 }), ctx, 'chainable');
+  ctx.report('creativeGuard', { reason: 'no adm' });
+  ctx.report('other', { a: 1 });
+
+  assert.deepEqual(ctx._reportExt, {
+    creativeGuard: { rejected: 2, reason: 'no adm' },
+    other: { a: 1 },
+  });
+});
+
+test('report() is independent of track(): neither leaks into the other', () => {
+  const ctx = makeCtx();
+  ctx.track('iiq', { dpi: '123' });
+  ctx.report('creativeGuard', { rejected: 1 });
+
+  assert.equal(ctx.serialize(RES).ext.creativeGuard, undefined, 'not in the tracking token');
+  assert.equal(ctx._reportExt.iiq, undefined, 'tracked data is not reported');
+});

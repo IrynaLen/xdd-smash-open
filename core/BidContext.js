@@ -166,6 +166,7 @@ export class BidContext {
     this._headers = {};
     this._endpoint = null;
     this._trackExt = null; // lazy — most requests never track
+    this._reportExt = null; // lazy — most requests never report
   }
 
   // Feature data for the tracking token, read back via tracking.addConsumer.
@@ -174,6 +175,15 @@ export class BidContext {
   track(namespace, data) {
     this._trackExt ??= {};
     this._trackExt[namespace] = { ...this._trackExt[namespace], ...data };
+    return this;
+  }
+
+  // Feature data for the platform, returned under ext.smash.ext of the
+  // response. Namespaced so two features cannot collide and the reader always
+  // knows the owner. Carried on a no-bid too.
+  report(namespace, data) {
+    this._reportExt ??= {};
+    this._reportExt[namespace] = { ...this._reportExt[namespace], ...data };
     return this;
   }
 
