@@ -52,10 +52,14 @@ function withNativeRequest(imp) {
 }
 
 export class BidContext {
-  constructor({ ssp, dsp, destination, inventory, impressions, device, user, publisher, privacy, content, signals, tmax, raw }) {
+  constructor({ ssp, dsp, destination, ext, inventory, impressions, device, user, publisher, privacy, content, signals, tmax, raw }) {
     this.ssp = ssp;
     this.dsp = dsp;
     this.destination = destination;
+
+    // Whatever the caller put in ext.smash.ext. Read-only as far as the
+    // pipeline is concerned; the outbound counterpart is report().
+    this.ext = ext ?? {};
 
     // 'app' | 'site' | 'dooh' | null — which inventory object the request carried
     this.inventory = inventory ?? null;
