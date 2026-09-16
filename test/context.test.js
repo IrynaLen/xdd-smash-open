@@ -91,3 +91,8 @@ test('report() is independent of track(): neither leaks into the other', () => {
   assert.equal(ctx.serialize(RES).ext.creativeGuard, undefined, 'not in the tracking token');
   assert.equal(ctx._reportExt.iiq, undefined, 'tracked data is not reported');
 });
+
+test('ctx.ext exposes what the caller sent, and is never undefined', () => {
+  assert.deepEqual(new BidContext({ ext: { client: 'adoptlabs' } }).ext, { client: 'adoptlabs' });
+  assert.deepEqual(new BidContext({}).ext, {}, 'readable without a guard');
+});
