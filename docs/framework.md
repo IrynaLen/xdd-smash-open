@@ -475,7 +475,7 @@ export default function(ctx) {
 
 **DSP (Demand-Side Platform).** The buyer. An external ad platform that responds to bid requests with a price and a creative. xdd-smash calls the DSP over HTTP on every request.
 
-**Prebid.** Everything that happens before the DSP responds. Includes `prebid-ssp` (processing the incoming Xeworks request) and `prebid-dsp` (shaping it for the DSP).
+**Pre-bid stage.** Everything that happens before the DSP responds. Includes `prebid-ssp` (processing the incoming Xeworks request) and `prebid-dsp` (shaping it for the DSP).
 
 **Postbid.** Everything that happens after the DSP responds. Includes `postbid-dsp` (processing the DSP response) and `postbid-ssp` (finalizing before returning to Xeworks).
 
